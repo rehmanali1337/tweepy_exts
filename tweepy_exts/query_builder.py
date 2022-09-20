@@ -1,17 +1,5 @@
 import tweepy
-
-tweet_fields = ['id',
-                'in_reply_to_user_id',
-                'referenced_tweets',
-                'context_annotations',
-                'source',
-                'created_at',
-                'entities',
-                'geo',
-                'withheld',
-                'public_metrics',
-                'text',
-                'author_id']
+import typing
 
 
 class QueryBuilder:
@@ -34,9 +22,10 @@ class QueryBuilder:
     def tweets_from_users(self, usernames: str,
                           remove_replies=False,
                           remove_retweets=False,
-                          remove_quoted=False):
-        max_query_len = 510
-        max_rules_allowed = 25
+                          remove_quoted=False,
+                          max_query_len: int = 510,
+                          max_rules_allowed: int = 25
+                          ):
         rules = []
         query = ""
         for i, username in enumerate(usernames):
@@ -55,6 +44,7 @@ class QueryBuilder:
                 rule = tweepy.StreamRule(value=query.strip(), id=str(i))
                 rules.append(rule)
                 return rules
+
             elif query == "":
                 # First username in the list
                 query = user_query
@@ -87,5 +77,33 @@ class QueryBuilder:
                 rule = tweepy.StreamRule(value=query.strip(), id=str(i))
                 rules.append(rule)
                 return rules
+
+        return rules
+
+    @classmethod
+    def track_keywords(self, keywords_list: typing.List[str],
+                       max_query_len: int = 510,
+                       max_rules_allowed: int = 25
+                       ):
+        rules = []
+        query = ""
+        for keyword in keywords_list:
+
+            if query == "":
+                query = f"{keyword}"
+
+            else:
+                if len(keyword) + len(query) >= max_query_len:
+                    rules.append(tweepy.StreamRule(query))
+
+                    if len(rules) == max_rules_allowed:
+                        return rules
+
+                    query = f"{keyword}"
+                    continue
+                query = f"{query} OR {keyword}"
+
+        if query.strip() != "":
+            rules.append(tweepy.StreamRule(query))
 
         return rules
