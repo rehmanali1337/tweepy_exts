@@ -1,3 +1,8 @@
 module_test.py
 test.py
 __pycache__
+test*.py
+*log
+*pyc
+.vscode
+*mypy*
