@@ -35,7 +35,7 @@ class AsyncMonitorEssentialAcces:
         self.client = AsyncClient(bearer_token=bearer_token)
 
     async def usernames_to_ids(self, usernames: typing.List[str]):
-        chunks = [usernames[x:x+100] for x in range(0, len(usernames), 100)]
+        chunks = [usernames[x:x + 100] for x in range(0, len(usernames), 100)]
         for chunk in chunks:
             res = await self.client.get_users(usernames=chunk)
             user_ids = [str(user.id) for user in res.data]
@@ -47,7 +47,7 @@ class AsyncMonitorEssentialAcces:
     async def track_keywords(self, keywords_list: list):
         await self.delete_existing_rules()
         streaming_rules = QueryBuilder.track_keywords(keywords_list)
-        await self.streaming_client.add_rules(streaming_rules)
+        await self.add_rules(streaming_rules)
         await self._start()
 
     async def delete_existing_rules(self):
@@ -66,10 +66,19 @@ class AsyncMonitorEssentialAcces:
         await self.delete_existing_rules()
         rules = QueryBuilder.tweets_from_users(
             usernames, remove_replies=remove_replies, remove_quoted=remove_quotes, remove_retweets=remove_retweets)
-        added = await self.streaming_client.add_rules(rules)
+        added = await self.add_rules(rules)
         logger.debug(f"Rules creation: {added}")
         await self.usernames_to_ids(usernames)
         await self._start()
+
+    async def add_rules(self, rules, delete_existing=True):
+        if delete_existing:
+            await self.delete_existing_rules()
+        return await self.streaming_client.add_rules(rules)
+
+    async def run(self, rules: typing.List[tweepy.StreamRule]):
+        await self.add_rules(rules)
+        return await self._start()
 
     async def sample(self):
         await self.streaming_client.sample()

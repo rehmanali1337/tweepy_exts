@@ -10,4 +10,5 @@ tweet_fields = ['id',
                 'withheld',
                 'public_metrics',
                 'text',
+                "attachments",
                 'author_id']

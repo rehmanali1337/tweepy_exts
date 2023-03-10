@@ -50,7 +50,7 @@ class QueryBuilder:
                 query = user_query
                 continue
 
-            if len(query) + len(user_query) > max_query_len and i+1 == len(usernames):
+            if len(query) + len(user_query) > max_query_len and i + 1 == len(usernames):
                 # We are the max character allowed in query and the username is last one
                 rule = tweepy.StreamRule(value=query.strip(), id=str(i))
                 rules.append(rule)
@@ -59,19 +59,19 @@ class QueryBuilder:
                 rules.append(rule)
                 return rules
 
-            elif len(query) + len(user_query) > max_query_len and i+1 != len(usernames):
+            elif len(query) + len(user_query) > max_query_len and i + 1 != len(usernames):
                 # At max characters allowed in the query  and NOT the last username
                 rule = tweepy.StreamRule(value=query.strip(), id=str(i))
                 rules.append(rule)
                 query = user_query
                 continue
 
-            elif len(query) + len(user_query) < max_query_len and i+1 != len(usernames):
+            elif len(query) + len(user_query) < max_query_len and i + 1 != len(usernames):
                 # NOT at max allowed characters and NOT the last username.
                 query = f"{query} OR {user_query}"
                 continue
 
-            elif len(query) + len(user_query) < max_query_len and i+1 == len(usernames):
+            elif len(query) + len(user_query) < max_query_len and i + 1 == len(usernames):
                 # Not at the max query len but last username
                 query = f"{query} OR {user_query}"
                 rule = tweepy.StreamRule(value=query.strip(), id=str(i))
@@ -107,3 +107,6 @@ class QueryBuilder:
             rules.append(tweepy.StreamRule(query))
 
         return rules
+
+
+RulesBuilder = QueryBuilder
