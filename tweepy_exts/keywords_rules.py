@@ -18,7 +18,7 @@ class KeywordRule(BasicRule):
         for keyword in _keywords:
             self.keywords.remove(keyword)
 
-            if len(keyword) + len(query) + len(self.query) >= self.max_query_len:
+            if len(keyword) + len(query) + len(self.non_negated_query) + len(self.negated_query) >= self.max_query_len:
                 print("Limit reached!!")
                 break
 
@@ -28,8 +28,8 @@ class KeywordRule(BasicRule):
             query = query.replace("OR", "", 1).strip()
 
         final_query = ""
-        if self.query.strip() != "":
-            final_query = f"({query}) {self.query}"
+        if self.negated_query.strip() != "" or self.non_negated_query.strip() != "":
+            final_query = f"{self.non_negated_query} ({query}) {self.negated_query}"
         else:
             final_query = query
 
@@ -91,10 +91,8 @@ class MultipleKeywordRulesBuilder:
             if self.is_reply is not None:
                 rule.is_reply(negated=not self.is_reply)
 
-
             if self.is_verified is not None:
                 rule.is_verified(negated=not self.is_verified)
-
 
             if self.is_nullcast is not None:
                 pass
@@ -113,7 +111,6 @@ class MultipleKeywordRulesBuilder:
             if self.has_mentions is not None:
                 rule.has_mentions(negated=not self.has_mentions)
 
-
             if self.has_media is not None:
                 rule.has_media(negated=not self.has_media)
 
@@ -122,7 +119,6 @@ class MultipleKeywordRulesBuilder:
 
             if self.has_images is not None:
                 rule.has_images(negated=not self.has_images)
-
 
             if self.has_geo is not None:
                 rule.has_geo(negated=not self.has_geo)

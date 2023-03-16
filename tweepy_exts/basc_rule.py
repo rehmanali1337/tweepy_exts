@@ -6,12 +6,15 @@ class BasicRule:
                  max_query_len: int = 510,
                  *args, **kwargs) -> None:
         self.max_query_len = max_query_len
-        self.query = ""
+        self.negated_query = ""
+        self.non_negated_query = ""
 
     def _add_operator(self, operator: str, negated=False):
         if negated:
             operator = f"-{operator}"
-        self.query = f"{self.query} {operator}".strip()
+            self.negated_query = f"{self.negated_query} {operator}".strip()
+        else:
+            self.non_negated_query = f"{self.non_negated_query} {operator}".strip()
 
     def has_links(self, negated=False):
         return self._add_operator("has:links", negated=negated)
