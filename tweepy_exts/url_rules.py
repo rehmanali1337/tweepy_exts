@@ -4,23 +4,23 @@ import typing
 from .basc_rule import BasicRule
 
 
-class UsersRule(BasicRule):
+class UrlRule(BasicRule):
 
-    def __init__(self, usernames: typing.List[str], **kwargs) -> None:
+    def __init__(self, urls: typing.List[str], **kwargs) -> None:
         super().__init__(**kwargs)
-        self.usernames = usernames
+        self.urls = urls
 
     def build(self) -> tweepy.StreamRule:
         """The last method to call to Build the rule"""
         query = ""
-        _usernames = self.usernames.copy()
-        for username in _usernames:
-            self.usernames.remove(username)
+        _urls = self.urls.copy()
+        for url in _urls:
+            self.urls.remove(url)
 
-            if len(username) + len(query) + len(self.non_negated_query) + len(self.negated_query) >= self.max_query_len:
+            if len(url) + len(query) + len(self.non_negated_query) + len(self.negated_query) >= self.max_query_len:
                 break
 
-            query = f"{query} OR from:{username}".strip()
+            query = f"{query} OR url:{url}".strip()
 
         if query.startswith("OR"):
             query = query.replace("OR", "", 1).strip()
@@ -34,9 +34,9 @@ class UsersRule(BasicRule):
         return tweepy.StreamRule(final_query)
 
 
-class MultipleUsersRulesBuilder:
+class MultipleUrlsRulesBuilder:
 
-    def __init__(self, usernames: typing.List[str],
+    def __init__(self, urls: typing.List[str],
                  max_rules=25,
                  max_query_len=510,
                  is_retweet=None,
@@ -54,7 +54,7 @@ class MultipleUsersRulesBuilder:
                  has_geo=None,
                  lang: str = None
                  ) -> None:
-        self.usernames = usernames
+        self.urls = urls
         self.max_rules = max_rules
         self.max_query_len = max_query_len
         self.is_retweet = is_retweet
@@ -77,11 +77,11 @@ class MultipleUsersRulesBuilder:
     def build(self) -> typing.List[tweepy.StreamRule]:
         while True:
             if len(self.rules) == self.max_rules:
-                if len(self.usernames) > 0:
-                    print(f"Extra usernames not being monitored: {len(self.usernames)}")
+                if len(self.urls) > 0:
+                    print(f"Extra urls not being monitored: {len(self.usernames)}")
                 break
 
-            rule = UsersRule(self.usernames)
+            rule = UrlRule(self.urls)
             if self.is_retweet is not None:
                 rule.is_retweet(negated=not self.is_retweet)
 
@@ -128,7 +128,7 @@ class MultipleUsersRulesBuilder:
 
             _build_rule = rule.build()
             self.rules.append(_build_rule)
-            if len(self.usernames) > 0:
+            if len(self.urls) > 0:
                 continue
 
             break
