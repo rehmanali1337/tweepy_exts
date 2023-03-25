@@ -1,7 +1,7 @@
 
-
 import typing
 from tweepy_exts.async_monitor import AsyncMonitorEssentialAcces
+from tweepy_exts.models import Tweet
 import asyncio
 import tweepy
 import colorama
@@ -48,16 +48,13 @@ class BasicMonitor:
                  targets_list: typing.List[str],
                  bearer_token: str,
                  output_queue: asyncio.Queue,
+                 *,
                  console: Console = Console,
-                 remove_duplicates=True,
-                 raw_tweet=False
+                 **kwargs
                  ) -> None:
         self.targets_list = targets_list
         self.output_queue = output_queue
-        self.remove_duplicates = remove_duplicates
-        self.raw_tweet = raw_tweet
         self.monitor = AsyncMonitorEssentialAcces(bearer_token, self.on_status)
-        self.ecl = []
         self.console = console
 
     async def start(self):
@@ -79,17 +76,7 @@ class BasicMonitor:
         return []
 
     async def on_status(self, tweet):
-        if self.raw_tweet:
-            return await self.output_queue.put(tweet)
-        tweet_id = tweet.id
-        if self.remove_duplicates and tweet_id in self.ecl:
-            return
-        self.ecl.append(tweet_id)
-        asyncio.create_task(self.handle_tweet(tweet_id))
+        asyncio.create_task(self.handle_tweet(tweet))
 
-    async def handle_tweet(self, tweet_id: str):
-        self.console.info("New Tweet:", self.tweet_id_to_url(tweet_id))
-        return await self.output_queue.put(tweet_id)
-
-    def tweet_id_to_url(self, tweet_id: str) -> str:
-        return f"https://twitter.com/i/status/{tweet_id}"
+    async def handle_tweet(self, tweet: Tweet):
+        return await self.output_queue.put(tweet)

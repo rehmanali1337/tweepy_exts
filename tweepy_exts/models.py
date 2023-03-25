@@ -1,4 +1,4 @@
-
+import datetime as dt
 
 class User:
 
@@ -95,6 +95,8 @@ class Tweet:
 
         self.attachments = data.get("attachments", {})
         self.created_at = data.get("created_at")
+        _created_at = self.created_at.split(".")[0]
+        self.created_at_dt = dt.datetime.strptime(_created_at, "%Y-%m-%dT%H:%M:%S")
         self.edit_hisotry_tweet_ids = data.get("edit_history_tweet_ids", [])
         self.public_matrics = data.get("public_matrics", {})
         self.retweet_count = self.public_matrics.get("retweet_count", None)
@@ -146,3 +148,6 @@ class Tweet:
                         if tweet.id == original_id:
                             self.text = tweet.text
                             break
+
+
+                        
