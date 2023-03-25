@@ -1,4 +1,5 @@
-
+from .models import Tweet
+import json
 import tweepy
 from tweepy.asynchronous import AsyncStreamingClient, AsyncClient
 from .logger import logger
@@ -22,9 +23,9 @@ class AsyncMainStreamingClient(AsyncStreamingClient):
     async def on_closed(self, resp):
         return logger.debug(f"Stream has been closed by twitter. {resp}")
 
-    async def on_tweet(self, status: tweepy.Tweet):
+    async def on_data(self, data: bytes):
         if self._on_status_callback:
-            return await self._on_status_callback(status)
+            return await self._on_status_callback(Tweet(json.loads(data.decode())))
 
 
 class AsyncMonitorEssentialAcces:
@@ -42,7 +43,7 @@ class AsyncMonitorEssentialAcces:
             MonitorState.valid_authors_ids.extend(user_ids)
 
     async def _start(self):
-        await self.streaming_client.filter(tweet_fields=static.tweet_fields)
+        await self.streaming_client.filter(expansions=static.expansions, tweet_fields=static.tweet_fields, user_fields=static.user_fields, media_fields=static.media_fields, place_fields=static.place_fields)
 
     async def track_keywords(self, keywords_list: list):
         await self.delete_existing_rules()

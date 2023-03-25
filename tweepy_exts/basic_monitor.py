@@ -49,11 +49,13 @@ class BasicMonitor:
                  bearer_token: str,
                  output_queue: asyncio.Queue,
                  console: Console = Console,
-                 remove_duplicates=True
+                 remove_duplicates=True,
+                 raw_tweet=False
                  ) -> None:
         self.targets_list = targets_list
         self.output_queue = output_queue
         self.remove_duplicates = remove_duplicates
+        self.raw_tweet = raw_tweet
         self.monitor = AsyncMonitorEssentialAcces(bearer_token, self.on_status)
         self.ecl = []
         self.console = console
@@ -77,6 +79,8 @@ class BasicMonitor:
         return []
 
     async def on_status(self, tweet):
+        if self.raw_tweet:
+            return await self.output_queue.put(tweet)
         tweet_id = tweet.id
         if self.remove_duplicates and tweet_id in self.ecl:
             return
