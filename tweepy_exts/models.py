@@ -1,8 +1,9 @@
 import datetime as dt
+from typing import Dict, Any
 
 class User:
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: Dict[str, Any]) -> None:
         self.data = data
         self.id = data.get("id")
         self.name = data.get("name")
@@ -21,13 +22,13 @@ class User:
 
 
 class Media:
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: Dict[str, Any]) -> None:
         self.data = data
 
 
 class Annotation:
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: Dict[str, Any]) -> None:
         self.data = data
         self.start = data.get("start", 0)
         self.end = data.get("end", 0)
@@ -38,7 +39,7 @@ class Annotation:
 
 class Image:
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: Dict[str, Any]) -> None:
         self.data = data
         self.url = data.get("url")
         self.width = data.get("width", 0)
@@ -53,7 +54,7 @@ class Image:
 
 class Url:
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: Dict[str, Any]) -> None:
         self.data = data
         self.start = data.get("start")
         self.end = data.get("end")
@@ -70,7 +71,8 @@ class Url:
 
 class Tweet:
 
-    def __init__(self, data: dict, from_alt=False) -> None:
+    def __init__(self, data: dict[str, Any], from_alt: bool = False) -> None:
+
         if data == {}:
             return
         self.full_data = data
@@ -80,7 +82,7 @@ class Tweet:
         self.tweets = [self._alt_init(t) for t in _includes.get("tweets", [])]
 
         if not from_alt:
-            data = self.full_data.get("data")
+            data = self.full_data.get("data", {})
 
         self.tweet_data = data
         self.id = data.get("id")
@@ -94,7 +96,7 @@ class Tweet:
                     break
 
         self.attachments = data.get("attachments", {})
-        self.created_at = data.get("created_at")
+        self.created_at = data.get("created_at", "")
         _created_at = self.created_at.split(".")[0]
         self.created_at_dt = dt.datetime.strptime(_created_at, "%Y-%m-%dT%H:%M:%S")
         self.edit_hisotry_tweet_ids = data.get("edit_history_tweet_ids", [])
@@ -122,11 +124,11 @@ class Tweet:
         self.fix_text()
 
     @classmethod
-    def _alt_init(cls, data: dict) -> "Tweet":
+    def _alt_init(cls, data: Dict[str, Any]) -> "Tweet":
         return cls(data, from_alt=True)
 
     @property
-    def url(self):
+    def url(self) -> str:
         author_username = "i" if self.author is None else self.author.username
         return f"https://twitter.com/{author_username}/status/{self.id}"
 
@@ -136,7 +138,7 @@ class Tweet:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def fix_text(self):
+    def fix_text(self) -> None:
         """If tweet is a retweet then get complete text from retweeted tweet"""
 
         if len(self.referenced_tweets) > 0:

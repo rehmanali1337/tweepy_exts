@@ -1,6 +1,7 @@
 import setuptools
+from typing import List
 
-required_packages = []
+required_packages: List[str] = []
 
 
 setuptools.setup(

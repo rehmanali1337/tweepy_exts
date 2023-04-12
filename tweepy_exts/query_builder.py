@@ -1,11 +1,12 @@
 import tweepy
-import typing
+from typing import List
 
 
 class QueryBuilder:
 
     @classmethod
-    def tweets_from_user_query(self, username: str, remove_replies=False, remove_retweets=False, remove_quoted=False):
+    def tweets_from_user_query(self, username: str, remove_replies: bool = False, remove_retweets: bool = False,
+                               remove_quoted: bool = False) -> str:
         query = f"from:{username}"
         if remove_retweets:
             query = f"{query} -is:retweet"
@@ -19,14 +20,14 @@ class QueryBuilder:
         return f"({query})"
 
     @classmethod
-    def tweets_from_users(self, usernames: str,
-                          remove_replies=False,
-                          remove_retweets=False,
-                          remove_quoted=False,
+    def tweets_from_users(self, usernames: List[str],
+                          remove_replies: bool = False,
+                          remove_retweets: bool = False,
+                          remove_quoted: bool = False,
                           max_query_len: int = 510,
                           max_rules_allowed: int = 25
-                          ):
-        rules = []
+                          ) -> List[tweepy.StreamRule]:
+        rules: List[tweepy.StreamRule] = []
         query = ""
         for i, username in enumerate(usernames):
             if len(rules) == max_rules_allowed:
@@ -81,10 +82,10 @@ class QueryBuilder:
         return rules
 
     @classmethod
-    def track_keywords(self, keywords_list: typing.List[str],
+    def track_keywords(self, keywords_list: List[str],
                        max_query_len: int = 510,
                        max_rules_allowed: int = 25
-                       ):
+                       ) -> List[tweepy.StreamRule]:
         rules = []
         query = ""
         for keyword in keywords_list:
