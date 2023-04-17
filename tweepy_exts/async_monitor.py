@@ -1,5 +1,6 @@
 from .models import Tweet
 import json
+from tweepy.client import Response
 import tweepy
 from tweepy.asynchronous import AsyncStreamingClient, AsyncClient
 from .logger import logger
@@ -26,9 +27,9 @@ class AsyncMainStreamingClient(AsyncStreamingClient):
     async def on_closed(self, resp: Any) -> None:
         return logger.debug(f"Stream has been closed by twitter. {resp}")
 
-    async def on_data(self, data: bytes) -> None:
+    async def on_data(self, raw_data: bytes) -> None:
         if self._on_status_callback:
-            await self._on_status_callback(Tweet(json.loads(data.decode())))
+            await self._on_status_callback(Tweet(json.loads(raw_data.decode())))
 
 
 class AsyncMonitorEssentialAcces:
@@ -42,6 +43,7 @@ class AsyncMonitorEssentialAcces:
         chunks = [usernames[x:x + 100] for x in range(0, len(usernames), 100)]
         for chunk in chunks:
             res = await self.client.get_users(usernames=chunk)
+            assert isinstance(res, Response), f"Response from twitter is not of type Response. Type: {type(res)}"
             user_ids = [str(user.id) for user in res.data]
             MonitorState.valid_authors_ids.extend(user_ids)
 
